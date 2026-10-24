@@ -18,6 +18,10 @@ def get_db():
     finally:
         db.close()
 
+def init_db():
+    """Creates all database tables defined in SQLAlchemy models."""
+    from app.models.trade import Trade
+    Base.metadata.create_all(bind=engine)
 
 mongo_client = MongoClient(settings.MONGO_URI)
 mongo_db = mongo_client[settings.MONGO_DB_NAME]

@@ -4,9 +4,27 @@ from sqlalchemy import text
 from pymongo.errors import ConnectionFailure
 import redis
 
+from contextlib import asynccontextmanager
+
 from app.core.config import settings
-from app.core.databases import get_db, mongo_db, redis_client
+from app.core.databases import (
+    get_db, init_db,
+    mongo_db, 
+    redis_client
+)
 from app.api.market import router as market_router
+from app.api.trades import router as trades_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        init_db()
+        print("PostgreSQL tables initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing database tables: {e}")
+    yield
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -14,9 +32,11 @@ app = FastAPI(
     version="1.0.0",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
+    lifespan=lifespan,
 )
 
 app.include_router(market_router, prefix=settings.API_V1_STR)
+app.include_router(trades_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

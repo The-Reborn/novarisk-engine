@@ -14,6 +14,7 @@ from app.core.databases import (
 )
 from app.api.market import router as market_router
 from app.api.trades import router as trades_router
+from app.api.pricing import router as pricing_router
 
 
 @asynccontextmanager
@@ -37,6 +38,7 @@ app = FastAPI(
 
 app.include_router(market_router, prefix=settings.API_V1_STR)
 app.include_router(trades_router, prefix=settings.API_V1_STR)
+app.include_router(pricing_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

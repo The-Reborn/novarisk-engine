@@ -6,6 +6,7 @@ import redis
 
 from app.core.config import settings
 from app.core.databases import get_db, mongo_db, redis_client
+from app.api.market import router as market_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -14,6 +15,8 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
 )
+
+app.include_router(market_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

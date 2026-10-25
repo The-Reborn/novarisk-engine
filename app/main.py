@@ -14,6 +14,7 @@ from app.api.market import router as market_router
 from app.api.trades import router as trades_router
 from app.api.pricing import router as pricing_router
 from app.api.reports import router as reports_router
+from app.api.risk import router as risk_router
 
 
 @asynccontextmanager
@@ -42,6 +43,7 @@ app.include_router(market_router, prefix=settings.API_V1_STR)
 app.include_router(trades_router, prefix=settings.API_V1_STR)
 app.include_router(pricing_router, prefix=settings.API_V1_STR)
 app.include_router(reports_router, prefix=settings.API_V1_STR)
+app.include_router(risk_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

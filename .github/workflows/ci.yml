@@ -15,7 +15,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_DB: novarisk
+          POSTGRES_DB: novarisk_db
           POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432

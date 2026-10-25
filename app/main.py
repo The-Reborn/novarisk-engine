@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.databases import (
     get_db, init_db,
-    connect_to_mongo, close_mongo_connection,
+    connect_to_mongo, close_mongo_connection, mongodb,
     redis_client
 )
 from app.api.market import router as market_router
@@ -55,7 +55,7 @@ def root():
 
 
 @app.get(f"{settings.API_V1_STR}/health")
-def health_check(db: Session = Depends(get_db)):
+async def health_check(db: Session = Depends(get_db)):
     """Comprehensive health check verifying PostgreSQL, MongoDB, and Redis connections."""
     health_status = {
         "status": "healthy",
@@ -74,8 +74,12 @@ def health_check(db: Session = Depends(get_db)):
         health_status["services"]["postgresql"] = f"error: {str(e)}"
 
     try:
-        mongo_db.command("ping")
-        health_status["services"]["mongodb"] = "healthy"
+        from app.core.databases import mongodb
+        if mongodb.client is not None:
+            await mongodb.client.admin.command("ping")
+            health_status["services"]["mongodb"] = "healthy"
+        else:
+            health_status["services"]["mongodb"] = "error: not connected"
     except Exception as e:
         health_status["status"] = "degraded"
         health_status["services"]["mongodb"] = f"error: {str(e)}"

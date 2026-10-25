@@ -50,6 +50,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Wait for Databases
+        run: |
+            echo "Waiting for PostgreSQL..."
+            until pg_isready -h localhost -p 5432 -U postgres; do
+              sleep 1
+            done
+            echo "PostgreSQL is up!"
+
       - name: Initialize Database Tables
         run: |
           python -c "from app.core.databases import Base, engine; from app.models.trade import Trade; from app.models.risk import PortfolioRiskLimit; Base.metadata.create_all(bind=engine)"

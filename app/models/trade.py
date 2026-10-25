@@ -19,8 +19,9 @@ class Trade(Base):
     portfolio_id = Column(String, index=True, nullable=False)
     instrument_type = Column(SQLEnum(InstrumentType), nullable=False)
     notional = Column(Float, nullable=False)
-    currency_pair = Column(String, nullable=False)  # e.g., "EURUSD"
+    currency_pair = Column(String, nullable=False)
     strike_rate = Column(Float, nullable=False)
+    option_type = Column(String, nullable=True)
     trade_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     maturity_date = Column(DateTime, nullable=False)
     counterparty = Column(String, nullable=True)

@@ -32,7 +32,6 @@ def simulate_market_tick():
     for key in INITIAL_MARKET_DATA.keys():
         current_rate = float(redis_client.get(key) or INITIAL_MARKET_DATA[key])
         
-        # Apply a small random percentage shift (-0.1% to +0.1%)
         shock = random.uniform(-0.001, 0.001)
         new_rate = round(current_rate * (1 + shock), 4)
         

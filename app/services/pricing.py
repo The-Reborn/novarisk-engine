@@ -17,6 +17,27 @@ def calculate_fx_forward_pv(trade: Trade, spot_rate: float) -> float:
     return round(pv, 2)
 
 
+def calculate_irs_pv(trade: Trade,) -> float:
+    """
+    Simplified Interest Rate Swap (IRS) valuation.
+    Returns the computed PV and the fetched market floating rate.
+    """
+    fixed_rate = float(trade.strike_rate)
+    
+    benchmark_ticker = f"IR:USD_SOFR"
+    try:
+        market_floating_rate = get_market_rate(benchmark_ticker)
+    except ValueError:
+        market_floating_rate = 0.045
+
+    # Simple valuation model: receiving fixed, paying floating (or vice versa)
+    # If market rates go up, a fixed-rate payer swap loses value.
+    rate_differential = fixed_rate - market_floating_rate
+    pv = trade.notional * rate_differential * 5.0  # Assumed 5-year tenor scaling factor
+    
+    return round(pv, 2)
+
+
 def price_trade(trade: Trade) -> dict:
     """Dispatches trade pricing based on instrument type using Redis market data."""
     if trade.instrument_type == InstrumentType.FX_FORWARD or trade.instrument_type == InstrumentType.FX_SPOT:
@@ -35,6 +56,17 @@ def price_trade(trade: Trade) -> dict:
             "notional": trade.notional,
             "strike_rate": trade.strike_rate,
             "live_market_rate": spot_rate,
+            "present_value": pv,
+            "currency": "USD"
+        }
+
+    elif trade.instrument_type == InstrumentType.INTEREST_RATE_SWAP:
+        pv = calculate_irs_pv(trade)
+        return {
+            "trade_id": trade.trade_id,
+            "instrument_type": trade.instrument_type,
+            "currency_pair": trade.currency_pair or "USD",
+            "notional": trade.notional,
             "present_value": pv,
             "currency": "USD"
         }

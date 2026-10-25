@@ -6,8 +6,9 @@ from app.core.databases import Base
 
 class InstrumentType(str, enum.Enum):
     FX_FORWARD = "FX_FORWARD"
-    INTEREST_RATE_SWAP = "INTEREST_RATE_SWAP"
+    INTEREST_RATE_SWAP = "IRS"
     FX_SPOT = "FX_SPOT"
+    VANILLA_OPTION = "OPTION"
 
 
 class Trade(Base):

@@ -2,29 +2,31 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pymongo.errors import ConnectionFailure
-import redis
-
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.databases import (
     get_db, init_db,
-    mongo_db, 
+    connect_to_mongo, close_mongo_connection,
     redis_client
 )
 from app.api.market import router as market_router
 from app.api.trades import router as trades_router
 from app.api.pricing import router as pricing_router
+from app.api.reports import router as reports_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         init_db()
-        print("PostgreSQL tables initialized successfully.")
+        connect_to_mongo()
+        print("PostgreSQL and MongoDB connected successfully.")
     except Exception as e:
-        print(f"Error initializing database tables: {e}")
+        print(f"Error during startup connection: {e}")
     yield
+
+    close_mongo_connection()
 
 
 app = FastAPI(
@@ -39,6 +41,7 @@ app = FastAPI(
 app.include_router(market_router, prefix=settings.API_V1_STR)
 app.include_router(trades_router, prefix=settings.API_V1_STR)
 app.include_router(pricing_router, prefix=settings.API_V1_STR)
+app.include_router(reports_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

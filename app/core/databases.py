@@ -1,8 +1,7 @@
-from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 import redis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-
 from app.core.config import settings
 
 engine = create_engine(settings.SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
@@ -23,13 +22,21 @@ def init_db():
     from app.models.trade import Trade
     Base.metadata.create_all(bind=engine)
 
-mongo_client = MongoClient(settings.MONGO_URI)
-mongo_db = mongo_client[settings.MONGO_DB_NAME]
+class MongoDB:
+    client: AsyncIOMotorClient = None
+    db = None
 
+mongodb = MongoDB()
 
-def get_mongo_db():
-    """Dependency to access the MongoDB report database."""
-    return mongo_db
+def connect_to_mongo():
+    """Connect to MongoDB on application startup,"""
+    mongodb.client = AsyncIOMotorClient(settings.MONGO_URI)
+    mongodb.db = mongodb.client.get_database(settings.MONGO_DB_NAME)
+
+def close_mongo_connection():
+    """Close MongoDB connection on application shutdown"""
+    if mongodb.client:
+        mongodb.client.close()
 
 
 redis_client = redis.Redis(
